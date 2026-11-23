@@ -1,0 +1,6 @@
+hemma-approval-v1
+request=req_01JC9Z4K7QH3
+round=2
+step=b5bb9d8014a0f9b1d61e21e796d78dccdf1352f23cd32812f4850b878ae4944c
+decision=approve
+expires=1762878600

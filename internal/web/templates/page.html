@@ -1,0 +1,151 @@
+{{define "page"}}{{template "top" "Peer"}}{{$d := .D}}
+<header>
+  <h1>Peer</h1>
+  <span class="muted">
+    {{with $d.Hub.State}}<span class="{{if eq . "running"}}ok{{else if eq . "starting"}}warn{{else if eq . "disabled"}}muted{{else}}bad{{end}}"><span class="dot"></span></span>hub {{.}}{{end}}
+    {{with $d.Hub.Node}} · {{.}}{{end}}
+    {{range $i, $ip := $d.Hub.IPs}}{{if eq $i 0}} · {{else}}, {{end}}<span class="mono">{{$ip}}</span>{{end}}
+    {{with $d.Hub.Version}} · <span class="mono">{{short 12 .}}</span>{{end}}
+  </span>
+  <form method="post" action="/auth/logout" style="margin-left:auto"><button class="link" type="submit">{{$d.Operator.Name}} · sign out</button></form>
+</header>
+
+{{with $d.Hub.Detail}}<p class="alert{{if eq $d.Hub.State "starting"}} muted{{end}}" role="alert">{{.}}</p>{{end}}
+{{range $d.Errors}}<p class="alert" role="alert">Could not read {{.}}; the hub logged the error.</p>{{end}}
+
+<section aria-label="Pending approvals">
+  <h2>Pending approvals</h2>
+  {{if not $d.Parked}}<p class="muted">Nothing is waiting for approval.</p>{{end}}
+  <ul>
+  {{range $d.Parked}}
+    <li>
+      <div class="row">
+        <span class="grow">{{.Sender}} → {{.Target}} · {{if .Tool}}{{.Tool}}{{else if .ParkKind}}{{.ParkKind}}{{else}}step{{end}}</span>
+        <span class="meta">round {{.ApprovalCycles}} · {{if .NotifiedAt.IsZero}}not sent yet{{else}}sent to the phone{{end}}</span>
+      </div>
+      <span class="muted clip" title="{{.Text}}">{{.Text}}</span>
+      {{with .ParkReason}}<span class="muted clip" title="{{.}}">{{.}}</span>{{end}}
+      {{with .Step}}<pre aria-label="Blocked step">{{.}}</pre>{{end}}
+    </li>
+  {{end}}
+  </ul>
+</section>
+
+<section aria-label="Phone for approvals">
+  <h2>Phone for approvals</h2>
+  {{with $d.Approver}}
+    <div class="row">
+      <span class="grow">{{.Name}}</span>
+      <span class="meta mono" title="{{.KeyID}}">key {{short 8 .KeyID}}</span>
+      <span class="meta" title="{{full .EnrolledAt}}">enrolled {{.EnrolledAt.Local.Format "2 Jan 2006"}}</span>
+      <a class="button" href="/approver/remove">Remove</a>
+    </div>
+  {{else}}
+    <p class="muted">No phone enrolled. Parked requests wait until one is.</p>
+  {{end}}
+  {{with $d.Code}}
+    <div class="enrol" data-enrol data-baseline="{{.Baseline}}" data-expires="{{.ExpiresAt.UTC.Format "2006-01-02T15:04:05Z07:00"}}">
+      {{.QR}}
+      <div>
+        <p>Scan with the iPhone camera at home (Wi-Fi or VPN); it opens Hemma.</p>
+        <p class="meta">Expires in <span id="left">10:00</span></p>
+      </div>
+    </div>
+    <p id="expired" class="muted" hidden>Code expired</p>
+  {{end}}
+  <form method="post" action="/approver/code" id="mint"{{if $d.Code}} hidden{{end}}>
+    <button type="submit" style="margin-top:12px">{{if $d.Code}}New code{{else}}Enrol a phone{{end}}</button>
+  </form>
+</section>
+
+<section aria-label="Hosts">
+  <h2>Hosts</h2>
+  {{if not $d.Hub.Hosts}}<p class="muted">No host has contacted the hub yet.</p>{{end}}
+  <ul>
+  {{range $d.Hub.Hosts}}
+    <li class="row">
+      <span class="grow">{{.Name}}</span>
+      {{if .GateUnverified}}<span class="meta bad">gate unverified</span>{{end}}
+      <span class="meta mono {{if eq .VersionState "behind"}}warn{{end}}"{{if eq .VersionState "behind"}} title="peer is behind the hub's deployed commit"{{end}}>{{if .Version}}{{.Version}}{{else}}unknown{{end}}{{if eq .VersionState "behind"}} · behind{{end}}</span>
+      <span class="meta" title="instance {{.Instance}}, started {{full .InstanceStartedAt}}"><time datetime="{{.LastSeenAt.UTC.Format "2006-01-02T15:04:05Z07:00"}}" title="{{full .LastSeenAt}}">{{ago .LastSeenAt}}</time></span>
+    </li>
+  {{end}}
+  </ul>
+</section>
+
+<section aria-label="Messages">
+  <h2>Messages</h2>
+  {{if not $d.Messages}}<p class="muted">No messages yet.</p>{{end}}
+  <ol>
+  {{range $d.Messages}}
+    <li class="row">
+      <time class="meta" style="width:5.5rem" title="{{full .CreatedAt}}">{{stamp .CreatedAt}}</time>
+      <span class="grow" style="white-space:normal">
+        <span class="row">
+          <span class="grow">{{.Sender}} → {{.Target}}</span>
+          <span class="meta">{{.Kind}}{{with .Phase}} · {{.}}{{end}} · {{if .Read}}read{{else}}unread{{end}}</span>
+        </span>
+        {{with .Body}}<span class="muted clip" title="{{.}}">{{.}}</span>{{end}}
+      </span>
+    </li>
+  {{end}}
+  </ol>
+</section>
+
+<section aria-label="Outcomes">
+  <h2>Outcomes</h2>
+  {{if not $d.Outcomes}}<p class="muted">No outcomes yet.</p>{{else}}
+  <div class="scroll">
+  <table aria-label="Message outcomes">
+    <thead><tr><th>When</th><th>Kind</th><th>Id</th><th>From → to</th><th>Outcome</th></tr></thead>
+    <tbody>
+    {{range $d.Outcomes}}
+      <tr>
+        <td class="mono meta" title="{{full .CreatedAt}}">{{stamp .CreatedAt}}</td>
+        <td class="muted">{{.Kind}}</td>
+        <td class="mono meta" title="{{.ID}}">{{short 24 .ID}}</td>
+        <td>{{.Sender}} → {{.Target}}</td>
+        <td>{{.State}}</td>
+      </tr>
+    {{end}}
+    </tbody>
+  </table>
+  </div>
+  {{end}}
+</section>
+
+<script nonce="{{.Nonce}}">
+(() => {
+  const enrol = document.querySelector("[data-enrol]");
+  if (!enrol) {
+    // Fresh state every 30 s; a GET, so a page that came from a POST is not resent.
+    setTimeout(() => location.replace("/"), 30000);
+    return;
+  }
+  const baseline = enrol.dataset.baseline;
+  const expires = Date.parse(enrol.dataset.expires);
+  const left = document.getElementById("left");
+  let tick, poll;
+  const update = () => {
+    const s = Math.max(0, Math.ceil((expires - Date.now()) / 1000));
+    left.textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+    if (s > 0) return;
+    clearInterval(tick);
+    clearInterval(poll);
+    enrol.hidden = true;
+    document.getElementById("expired").hidden = false;
+    document.getElementById("mint").hidden = false;
+  };
+  update();
+  tick = setInterval(update, 1000);
+  // A different key than when the code was minted: the phone has enrolled.
+  poll = setInterval(async () => {
+    try {
+      const r = await fetch("/api/peer/approvers", { cache: "no-store" });
+      const j = await r.json();
+      if ((j.approver?.key_id ?? "") !== baseline) location.replace("/");
+    } catch {}
+  }, 2000);
+})();
+</script>
+{{template "bottom"}}{{end}}

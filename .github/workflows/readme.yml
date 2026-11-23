@@ -1,0 +1,23 @@
+# Keeps the README's manifest section the same as homelab-stack.json.
+name: readme
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - homelab-stack.json
+      - README.md
+      - .github/workflows/readme.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  readme:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Write the manifest into the README
+        run: curl -fsSL https://raw.githubusercontent.com/homelab-ngx/homelab-ngx/main/scripts/stack-readme | bash -s -- --commit

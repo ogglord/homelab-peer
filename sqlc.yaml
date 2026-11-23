@@ -1,0 +1,13 @@
+version: "2"
+sql:
+  - engine: sqlite
+    schema: db/schema.sql
+    queries: db/queries
+    gen:
+      go:
+        package: store
+        out: internal/store
+        output_files_suffix: .gen
+        output_db_file_name: db.gen.go
+        output_models_file_name: models.gen.go
+        emit_pointers_for_null_types: true

@@ -1,0 +1,3 @@
+# Copied verbatim from the Hemma repo's fixtures/: the exact bytes a phone
+# signs, with no final newline. Git must not touch them.
+approval-signing.txt -text

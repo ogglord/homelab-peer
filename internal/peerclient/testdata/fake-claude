@@ -1,0 +1,5 @@
+#!/bin/sh
+# Fake `claude` for the run launcher tests: re-enters the test binary, whose
+# TestMain runs fakeClaude (fake_claude_test.go). Never calls the API.
+# GORACE: a -race test binary otherwise sleeps a second at every exit.
+GORACE="${GORACE:-atexit_sleep_ms=0}" PEERCLIENT_HELPER=fake-claude exec "$PEERCLIENT_TEST_BIN" "$@"

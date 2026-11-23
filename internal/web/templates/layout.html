@@ -1,0 +1,79 @@
+{{define "top"}}<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>{{.}}</title>
+<style>
+:root {
+  color-scheme: light dark;
+  --bg: #fafaf9; --fg: #1c1917; --muted: #78716c; --rule: #e7e5e4; --panel: #f5f5f4;
+  --ok: #15803d; --warn: #b45309; --bad: #b91c1c; --accent: #1d4ed8;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #0c0a09; --fg: #e7e5e4; --muted: #a8a29e; --rule: #292524; --panel: #1c1917;
+    --ok: #4ade80; --warn: #fbbf24; --bad: #f87171; --accent: #93c5fd; }
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--bg); color: var(--fg);
+  font: 14px/1.45 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+main { max-width: 60rem; margin: 0 auto; padding: 24px 16px 64px; }
+header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; margin-bottom: 24px; }
+h1 { font-size: 20px; margin: 0; }
+h2 { font: 500 11px/1 ui-monospace, SFMono-Regular, Menlo, monospace; text-transform: uppercase;
+  letter-spacing: .06em; color: var(--muted); margin: 0 0 8px; }
+section { margin: 0 0 28px; }
+ul, ol { list-style: none; margin: 0; padding: 0; }
+li { padding: 6px 0; border-bottom: 1px solid var(--rule); }
+li:last-child { border-bottom: 0; }
+.row { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+.grow { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.meta, .muted { color: var(--muted); font-size: 12px; }
+.meta { flex-shrink: 0; font-variant-numeric: tabular-nums; }
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+.clip { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+pre { font: 12px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; white-space: pre-wrap; word-break: break-all;
+  background: var(--panel); padding: 8px; border-radius: 4px; margin: 6px 0 0; }
+.ok { color: var(--ok); } .warn { color: var(--warn); } .bad { color: var(--bad); }
+.dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: currentColor; margin-right: 6px; }
+.alert { border-left: 3px solid var(--bad); padding: 6px 10px; background: var(--panel); margin: 0 0 20px; }
+table { width: 100%; border-collapse: collapse; }
+th { text-align: left; font-weight: normal; color: var(--muted); font-size: 12px; border-bottom: 1px solid var(--rule); padding: 4px 8px 4px 0; }
+td { padding: 6px 8px 6px 0; border-bottom: 1px solid var(--rule); vertical-align: baseline; }
+.scroll { overflow-x: auto; }
+form { display: inline; margin: 0; }
+button, .button { font: inherit; font-size: 13px; padding: 5px 12px; border-radius: 6px; cursor: pointer;
+  border: 1px solid var(--rule); background: var(--panel); color: var(--fg); text-decoration: none; display: inline-block; }
+button.danger { background: var(--bad); border-color: var(--bad); color: #fff; }
+button.link { border: 0; background: none; padding: 0; color: var(--muted); font-size: 12px; }
+a { color: var(--accent); }
+.enrol { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; margin-top: 12px; }
+.qr { width: 224px; max-width: 100%; height: auto; border-radius: 4px; }
+.actions { display: flex; gap: 8px; margin-top: 16px; }
+</style>
+</head>
+<body>
+<main>
+{{end}}
+
+{{define "bottom"}}
+</main>
+</body>
+</html>
+{{end}}
+
+{{define "message"}}{{template "top" .D.Title}}
+<h1>{{.D.Title}}</h1>
+<p>{{.D.Body}}</p>
+{{template "bottom"}}{{end}}
+
+{{define "remove"}}{{template "top" "Remove the phone?"}}
+<h1>Remove {{.D.Name}}?</h1>
+<p class="muted">Its decisions are refused from now on. Parked requests wait until a phone enrols again.</p>
+<div class="actions">
+  <form method="post" action="/approver/remove"><button class="danger" type="submit">Remove phone</button></form>
+  <a class="button" href="/">Cancel</a>
+</div>
+{{template "bottom"}}{{end}}

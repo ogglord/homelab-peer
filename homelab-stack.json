@@ -1,0 +1,73 @@
+{
+  "version": 9,
+  "name": "peer",
+  "nixpkgs": "nixos-unstable",
+  "icon": "icon.svg",
+  "routes": [{ "host": "peer", "port": 8080 }],
+  "gpu": false,
+  "egress": [
+    { "to": "$HEMMA_ADDRESS", "port": 8788, "proto": "tcp" },
+    { "to": "$HEMMA_ADDRESS", "port": 41641, "proto": "udp" },
+    { "to": "host", "port": 41641, "proto": "udp" }
+  ],
+  "ports": [],
+  "containers": false,
+  "services": [{ "unit": "peer-hub.service", "icon": "icon.svg" }],
+  "variables": [
+    {
+      "name": "PEER_HUB_TAILSCALE_CLIENT_SECRET",
+      "kind": "secret",
+      "description": "Tailscale OAuth client secret (tskey-client-…) with the Auth Keys write scope on tag:homelab-hub; the hub mints its node's auth key with it.",
+      "required": true
+    },
+    {
+      "name": "HEMMA_ADDRESS",
+      "kind": "address",
+      "description": "IPv4 address of the Home Assistant box that runs the Hemma add-on (port 8788). The hub reaches Hemma there, and the box's Tailscale directly on UDP 41641.",
+      "required": true
+    },
+    {
+      "name": "HEMMA_TOKEN",
+      "kind": "secret",
+      "description": "Bearer token of the Hemma hub on the Home Assistant box, which the hub uses to prompt the approver phone and read its decisions.",
+      "required": true
+    },
+    {
+      "name": "HEMMA_CERT_SHA256",
+      "kind": "env",
+      "description": "SHA-256 (hex) of the Hemma add-on's self-signed certificate (DER), which the hub pins. Not secret.",
+      "required": true
+    },
+    {
+      "name": "OIDC_ISSUER",
+      "kind": "env",
+      "description": "Pocket ID's address, the issuer the peer page signs in with, such as https://auth.example.com.",
+      "required": true
+    },
+    {
+      "name": "OIDC_CLIENT_ID",
+      "kind": "env",
+      "description": "Client ID of the peer page's OIDC client in Pocket ID (callback URL https://peer.<domain>/auth/callback).",
+      "required": true
+    },
+    {
+      "name": "OIDC_CLIENT_SECRET",
+      "kind": "secret",
+      "description": "Client secret of the peer page's OIDC client in Pocket ID.",
+      "required": true
+    },
+    {
+      "name": "OIDC_ADMIN_GROUP",
+      "kind": "env",
+      "description": "The Pocket ID group whose members may sign in to the peer page, enrol the approver phone and remove it.",
+      "required": true
+    }
+  ],
+  "backup": {
+    "folders": [{ "label": "Hub database and network identity", "path": "/var/lib/peer-hub" }]
+  },
+  "health": {
+    "units": ["peer-hub.service"],
+    "http": { "port": 8080, "path": "/healthz" }
+  }
+}

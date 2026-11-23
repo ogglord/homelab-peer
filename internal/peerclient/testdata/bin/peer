@@ -1,0 +1,5 @@
+#!/bin/sh
+# Fake `peer` on the fake run's PATH and as the hook command: re-enters the
+# test binary, whose TestMain runs fakePeer (fake_claude_test.go).
+# GORACE: a -race test binary otherwise sleeps a second at every exit.
+GORACE="${GORACE:-atexit_sleep_ms=0}" PEERCLIENT_HELPER=peer exec "$PEERCLIENT_TEST_BIN" "$@"
