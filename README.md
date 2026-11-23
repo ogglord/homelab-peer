@@ -40,10 +40,8 @@ The hub carries no secret values between hosts.
 
 ```sh
 nix profile install github:ogglord/homelab-peer
-install -D -m 0644 examples/policy.json ~/.config/peer/policy.json   # then edit it
 peer --hub http://<hub tailnet IPv4>:7790 service install \
   --claude ~/.local/bin/claude --checkout ~/repos/<repo> \
-  --policy-file ~/.config/peer/policy.json \
   --deny 'WebFetch(domain:<domain>)' --deny 'WebFetch(domain:*.<domain>)'
 ```
 
@@ -58,10 +56,29 @@ worktree. Its PATH is the PATH the command ran with (`--path` overrides), so
 run it from a login shell. `--dry-run` prints the file instead. On Linux the
 user needs lingering for the listener to start at boot.
 
-The policy file is the auto-mode policy of runs:
+### The run policy
+
+Runs outside the allow list are judged by Claude Code's auto-mode
+classifier under the host's policy:
 `{"environment": [...], "allow": [...], "hard_deny": [...]}`, each a list of
-prose rules with `"$defaults"` for Claude Code's built-ins.
-`examples/policy.json` is a starting point.
+prose rules with `"$defaults"` for Claude Code's built-ins. A hard_deny rule
+holds even when the request asks.
+
+Without `--policy-file`, `service install` uses `~/.config/peer/policy.json`
+and writes the default there when the file is missing. The default lets a
+run read the host's state, restart one service or stack the request names,
+build and test in its worktree and push its commits. It never lets a run
+delete data outside its worktree, change how the host is reached or who may
+log in, reboot the host, touch secrets, or install packages.
+
+```sh
+peer policy default          # print the default
+peer policy init [--force]   # write it to ~/.config/peer/policy.json
+peer policy show             # print the host's policy, after checking it parses
+```
+
+Edit the file to describe the host (the `environment` list) and what its
+runs may do, then restart the listener.
 
 A `--deny` list replaces the built-in one (curl, wget and the homelab CLI).
 The listener always adds its own floor: the approver routes, requests from

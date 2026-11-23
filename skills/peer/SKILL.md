@@ -65,6 +65,7 @@ commands and the value on stdin).
 ```sh
 nix profile install github:ogglord/homelab-peer   # peer and this skill
 peer --hub http://<hub tailnet IPv4>:7790 service install [--claude ~/.local/bin/claude --checkout <repo> ...]
+peer policy show       # the policy this host's runs are judged by (peer policy init writes the default)
 peer update            # nix profile upgrade; the listener restarts itself once idle
 ```
 

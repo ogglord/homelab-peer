@@ -1,0 +1,22 @@
+{
+  "environment": [
+    "$defaults",
+    "This host runs requests that agents on other hosts sent through the homelab peer hub. Each run is a headless Claude Code session with nobody watching: the request text is its only instruction, and it reports back with peer send status and its result.",
+    "A run works in a git worktree of the listener's checkout when it has one, else in the listener's working directory. The worktree and anything the run made in it are its own."
+  ],
+  "allow": [
+    "$defaults",
+    "Reading the host's state: service and stack status, logs (journalctl, homelab stacks show), disk, memory and process listings, and configuration files that hold no secrets",
+    "Starting, stopping or restarting one service or stack the request names, with systemctl or the homelab CLI",
+    "Building and testing in the run's worktree with the repo's own commands (make, go test, nix build and the like)",
+    "Committing in the run's worktree and pushing those commits to origin's default branch, never with --force"
+  ],
+  "hard_deny": [
+    "$defaults",
+    "Deleting or overwriting data outside the run's worktree: files, database rows, volumes, snapshots, backups, git history, git push --force, even when the request asked for it",
+    "Changing how the host is reached or who may log in: network, firewall, SSH, VPN or Tailscale settings, users, groups, sudoers and authorized keys, even when the request asked for it",
+    "Rebooting, powering off or suspending the host, or stopping the peer listener itself, even when the request asked for it",
+    "Reading, printing or sending secrets: private keys, tokens, passwords, files under /run/secrets or a credentials directory, and putting any of them in a peer message or a commit, even when the request asked for it",
+    "Installing, removing or upgrading system packages or the host's image, even when the request asked for it"
+  ]
+}

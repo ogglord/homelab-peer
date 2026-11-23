@@ -205,6 +205,7 @@ func run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 				Action: e.listen,
 			},
 			serviceCommand(e),
+			policyCommand(e),
 			updateCommand(e),
 			{
 				Name:  "doctor",

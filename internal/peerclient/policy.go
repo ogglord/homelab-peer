@@ -2,11 +2,23 @@ package peerclient
 
 import (
 	"bytes"
+	_ "embed"
 	"encoding/json"
 	"fmt"
 	"os"
 	"slices"
 )
+
+// defaultPolicyFile is the policy `peer policy init` and `peer service
+// install` write for a host: Claude Code's defaults, what an unattended run
+// may do to the host it runs on, and what it may not do even when the
+// request asks.
+//
+//go:embed default-policy.json
+var defaultPolicyFile []byte
+
+// DefaultPolicyFile is the default policy file's bytes, ready to write.
+func DefaultPolicyFile() []byte { return slices.Clone(defaultPolicyFile) }
 
 // Policy is the host's auto-mode policy: the prose rules Claude Code's
 // classifier judges every call outside the allow list by, passed as the
@@ -23,8 +35,9 @@ type Policy struct {
 // approverHardDeny is always among a run's hard_deny rules (forRun).
 const approverHardDeny = "Minting peer enrolment codes or enrolling approver keys"
 
-// DefaultPolicy is the generic policy of a host that sets none: Claude
-// Code's defaults plus the approver rule.
+// DefaultPolicy is the policy of a listener given no policy file: Claude
+// Code's defaults plus the approver rule. A host installed with `peer
+// service install` gets DefaultPolicyFile instead.
 func DefaultPolicy() Policy {
 	return Policy{
 		Environment: []string{"$defaults"},

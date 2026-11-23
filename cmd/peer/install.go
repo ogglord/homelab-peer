@@ -61,7 +61,7 @@ func installCommand(e env) *cli.Command {
 			&cli.StringFlag{Name: "checkout", Usage: "git checkout each request runs in a worktree of (see listen --checkout)"},
 			&cli.StringSliceFlag{Name: "allow", Usage: "tool rule a run may use without approval (repeatable)"},
 			&cli.StringSliceFlag{Name: "deny", Usage: "tool rule a run may never use (repeatable)"},
-			&cli.StringFlag{Name: "policy-file", Usage: "auto-mode policy file for runs (see listen --policy-file)"},
+			&cli.StringFlag{Name: "policy-file", Usage: "auto-mode policy file for runs (default: ~/.config/peer/policy.json, written from `peer policy default` when missing)"},
 			&cli.StringFlag{Name: "model", Usage: "model for runs"},
 			&cli.StringFlag{Name: "path", Usage: "PATH for the listener and its runs (default: this command's PATH)"},
 			&cli.BoolFlag{Name: "no-skill", Usage: "do not link ~/.claude/skills/peer"},
@@ -103,6 +103,21 @@ func (e env) serviceInstall(c *cli.Context) error {
 			}
 			s.Listen = append(s.Listen, "--"+f, abs)
 		}
+	}
+	// Without --policy-file the host's policy file, made from the default
+	// the first time.
+	if c.String("policy-file") == "" {
+		policy := filepath.Join(userConfigDir(home), policyFileName)
+		if !c.Bool("dry-run") {
+			wrote, err := writeDefaultPolicy(policy, false)
+			if err != nil {
+				return err
+			}
+			if wrote {
+				fmt.Fprintf(e.out, "wrote %s: the default policy; review it, and restart the listener after an edit\n", policy)
+			}
+		}
+		s.Listen = append(s.Listen, "--policy-file", policy)
 	}
 	if v := c.String("model"); v != "" {
 		s.Listen = append(s.Listen, "--model", v)
