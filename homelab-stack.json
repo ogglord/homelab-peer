@@ -1,5 +1,5 @@
 {
-  "version": 9,
+  "version": 10,
   "name": "peer",
   "nixpkgs": "nixos-unstable",
   "icon": "icon.svg",
@@ -23,6 +23,7 @@
     {
       "name": "HEMMA_ADDRESS",
       "kind": "address",
+      "single": true,
       "description": "IPv4 address of the Home Assistant box that runs the Hemma add-on (port 8788). The hub reaches Hemma there, and the box's Tailscale directly on UDP 41641.",
       "required": true
     },

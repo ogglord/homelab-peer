@@ -34,7 +34,7 @@
       );
 
       # What the homelab daemon builds, on its base module and the nixpkgs
-      # homelab-stack.json recommends (manifest version 9).
+      # homelab-stack.json recommends (manifest version 10).
       nixosModules.default =
         { pkgs, ... }:
         {
