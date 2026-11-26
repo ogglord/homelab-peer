@@ -195,7 +195,7 @@ An update is kept when all of this holds, and rolled back when it does not.
 - `peer-hub.service` is active.
 - Port 8080 answers at `/healthz`.
 
-Manifest version 9, built with nixpkgs `nixos-unstable`. Runs on [homelab-ngx](https://github.com/homelab-ngx/homelab-ngx).
+Manifest version 10, built with nixpkgs `nixos-unstable`. Runs on [homelab-ngx](https://github.com/homelab-ngx/homelab-ngx).
 
 <!-- manifest:end -->
 
